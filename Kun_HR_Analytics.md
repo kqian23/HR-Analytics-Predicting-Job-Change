@@ -112,6 +112,7 @@ two_plots <- function(category) {
 **Now let’s visualize each categorical variable and the target variable,
 to identify interesting patterns of job switching decisions.**
 
+
 ``` r
 two_plots(gender)
 ```
@@ -120,7 +121,8 @@ two_plots(gender)
 
 In this sample there’s more male than female. It seems like the gender
 balance in Data Science field is still a problem. The pink bin stands
-for missing gender.
+for missing gender.\ 
+
 
 ``` r
 two_plots(relevent_experience)
@@ -131,7 +133,8 @@ two_plots(relevent_experience)
 Most people in this sample has relevant experience in Data Science.
 However, those who doesn’t tend to seeking for job change more often.
 Maybe those are the people who wants to take the opportunity of this
-training and make a career switch.
+training and make a career switch.\ 
+
 
 ``` r
 two_plots(enrolled_university)
@@ -142,7 +145,8 @@ two_plots(enrolled_university)
 Most people are not enrolled in a university right now. People who
 enrolled in full time course are likely to look for job change. It makes
 sense as most people enroll in universities to either get their first
-job or seek for career switch
+job or seek for career switch.\ 
+
 
 ``` r
 two_plots(education_level)
@@ -154,7 +158,8 @@ Most people have a master degree. That explains the high
 ‘no\_enrollment’ in the previous chart. This group of people might
 be industry professionals who hold a master degree seeking for career
 advancement or career switch. They have the highest intention for job
-change.
+change.\ 
+
 
 ``` r
 two_plots(major_discipline)
@@ -164,7 +169,8 @@ two_plots(major_discipline)
 
 It’s not surprising that most candidates are from a STEM major as we are
 analyzing a Data Science training program. Job switching intential is
-even across majors.
+even across majors.\ 
+
 
 ``` r
 two_plots(experience)
@@ -175,7 +181,8 @@ two_plots(experience)
 More than 3000 people have over 20 years of experience; Only a tiny
 amount of people have less than 1 year of experience. This is consistent
 with our previous finding that the majority of people are industry
-professional looking for career switch or career advancement.
+professional looking for career switch or career advancement\ 
+
 
 ``` r
 two_plots(company_size)
@@ -187,7 +194,8 @@ pattern. For example, people might leave it blank if they don’t
 currently have a job. Further investigation into how the data is
 collected and the missing pattern need to be done before drawing
 conclusion. Other than this unknown category, job switch percentage
-seems to be relatively even across all company sizes.
+seems to be relatively even across all company sizes.\ 
+
 
 ``` r
 two_plots(company_type)
@@ -197,7 +205,8 @@ two_plots(company_type)
 
 Near 100,000 people are from private limited company. The 2nd most
 category is early stage companies, which have the highest percentage of
-job switch intention.
+job switch intention.\ 
+
 
 ``` r
 two_plots(last_new_job)
@@ -276,6 +285,7 @@ ggplot(hr, aes(x = training_hours, group=as.factor(target), color=as.factor(targ
 Training hours seem to not affect job switch a lot.
 
 <br>
+\ 
 
 # 2\. Data Cleaning
 
@@ -414,6 +424,7 @@ hr.cleaned <- data.frame(predict(dmy, newdata = hr.cleaned))
 ```
 
 <br>
+\ 
 
 # 3.Modeling
 
@@ -577,9 +588,8 @@ auc.xgb
 
 ### 3.3.3 XGBoost Tuning
 
-**XGBoost Tuning: nround** What is nround?: It controls the maximum
-number of iterations. For classification, it is similar to the number of
-trees to grow.
+**XGBoost Tuning: nround** 
+What is nround?: It controls the maximum number of iterations. For classification, it is similar to the number of trees to grow.
 
 ``` r
 # convert dtaframe to DMatrix
@@ -619,8 +629,8 @@ max(xgbcv$evaluation_log$test_auc_mean)
 # The highest auc on CV set is 0.8014
 ```
 
-**XGBoost Tuning: grid search** Here we tune the following other
-parameters:
+**XGBoost Tuning: grid search** 
+Here we tune the following other parameters:
 
   - eta: It controls the learning rate, i.e., the rate at which our
     model learns patterns in data. After every round, it shrinks the
@@ -698,6 +708,7 @@ xgb.plot.importance (importance_matrix = mat[1:20])
 ```
 
 ![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+
 According to our best model, city\_development\_index is the best
 predictor to whether a candidate is looking for job change or not. From
 our previous exploratory analysis, it seems like candidates in a less

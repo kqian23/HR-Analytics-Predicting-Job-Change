@@ -27,7 +27,8 @@ str(hr)
 
 # 1. Exploratory Data Analysis
 ## 1.1 Explore Categorical Variables
-**Write a function to generate two visualizations that allow us to observe the relationship**
+**Write a function to generate two visualizations that allow us to observe the relationship** \ 
+
 ```{r}
 # visualization
 library(ggplot2)
@@ -62,7 +63,8 @@ two_plots <- function(category) {
 }
 ```
 
-**Now let's visualize each categorical variable and the target variable, to identify interesting patterns of job switching decisions.**
+**Now let's visualize each categorical variable and the target variable, to identify interesting patterns of job switching decisions.** \ 
+
 ```{r}
 two_plots(gender)
 ```
@@ -121,7 +123,8 @@ Most people only have 1 year between their previous job and current job.
 <br>
 
 ## 1.2 Explore Continuous Variables
-**correlation plot**
+**correlation plot** \ 
+
 ```{r}
 library(corrplot)
 # Correlation between continuous variables
@@ -132,7 +135,8 @@ corplot <- corrplot(cor, type = 'lower', method = 'number')
 
 City development index has a moderate negative correlation with the target varibale. That means the more developed the city is, the less people in that city are likely to look for job change. Also it seems like training hour is not linearly correlated with job change.
 
-**Look into the relationship between city development index and job switch rate**
+**Look into the relationship between city development index and job switch rate** \ 
+
 ```{r}
 # Look into the relationship between city development index and job switch rate
 cities <- 
@@ -150,7 +154,8 @@ ggplot(cities, aes(x=avg_development_index, y=switch_rate, color=city)) +
 There's an interesting pattern between city development level and switch rate. It seems like the job switch rate is high for cities that have a development index less than 0.6. However, once a city reaches above 0.6, the job switch rate shows a downward trend for developed cities.
 
 
-**The distribution of city development index by different target group**
+**The distribution of city development index by different target group** \ 
+
 ```{r}
 # The distribution of city development index by different target group
 ggplot(hr, aes(x = city_development_index, group=as.factor(target), color=as.factor(target))) + geom_density(stat = 'density')+ ggtitle("Distribution of city development index by target group") + scale_colour_discrete("Switching Job?")
@@ -159,7 +164,8 @@ ggplot(hr, aes(x = city_development_index, group=as.factor(target), color=as.fac
 More people at a low city development index are looking for job change, and less at high development index are looking for job change.
 
 
-**Distribution of training hours by target group**
+**Distribution of training hours by target group** \ 
+
 ```{r}
 # Distribution of training hours by target group
 ggplot(hr, aes(x = training_hours, group=as.factor(target), color=as.factor(target))) + geom_density(stat = 'density')+ ggtitle("Distribution of training hours by target group") + scale_colour_discrete("Switching Job?")
@@ -291,7 +297,8 @@ sum(train$target)/nrow(train)
 sum(test$target)/nrow(test)
 ```
 
-**Create a function to calculate auc**
+**Create a function to calculate auc** \ 
+
 ```{r}
 library(pROC)
 # function to get auc on both train and test set
@@ -385,7 +392,8 @@ auc.xgb
 ```
 
 ### 3.3.3 XGBoost Tuning
-**XGBoost Tuning: nround**
+**XGBoost Tuning: nround** \ 
+
 What is nround?: It controls the maximum number of iterations. For classification, it is similar to the number of trees to grow.
 ```{r}
 # convert dtaframe to DMatrix
@@ -404,7 +412,8 @@ max(xgbcv$evaluation_log$test_auc_mean)
 # The highest auc on CV set is 0.8014
 ```
 
-**XGBoost Tuning: grid search**
+**XGBoost Tuning: grid search** \ 
+
 Here we tune the following other parameters:
 
 - eta: It controls the learning rate, i.e., the rate at which our model learns patterns in data. After every round, it shrinks the feature weights to reach the best optimum.
@@ -470,10 +479,11 @@ model.xgboost.super <- xgboost(data = data.matrix(train[,col.xgb]),
 mat <- xgb.importance (feature_names = colnames(test[,-1]),model = model.xgboost.super)
 xgb.plot.importance (importance_matrix = mat[1:20]) 
 ```
+
 According to our best model, city_development_index is the best predictor to whether a candidate is looking for job change or not. From our previous exploratory analysis, it seems like candidates in a less developed city are more likely to look for job change. The second highest predictor is company size. For this one we don't have much insight as missing value contributes to the highest company size category. Again, further investigation on the data collection process and the missing patter need to be done to get insights.
 
 ### 3.3.6 Tuned XGBoost Model Performance - AUC
-```{r}
+```{r fig.width=5, fig.height=5}
 # xgboost on train
 pred.xgb.s.train <- predict(model.xgboost.super, as.matrix(train[,col.xgb]))
 auc.xgb.s.train <- roc(train$target, pred.xgb.s.train)
