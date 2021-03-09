@@ -3,8 +3,7 @@ title: "HR Analytics"
 author: "Kun Qian"
 date: "3/1/2021"
 output: 
-  github_document:
-    toc: true
+  word_document
 ---
 
 ```{r setup, include=FALSE}
@@ -337,7 +336,7 @@ model.cart <- rpart(target~., train)
 get_auc(model.cart)
 ```
 ## 3.2.2 CART Tuning 
-```{r}
+```{r cache=TRUE}
 # then, tune the tree
 library(e1071)
 # use 10 folds for cross-validation
@@ -395,7 +394,7 @@ auc.xgb
 **XGBoost Tuning: nround** \ 
 
 What is nround?: It controls the maximum number of iterations. For classification, it is similar to the number of trees to grow.
-```{r}
+```{r cache=TRUE}
 # convert dtaframe to DMatrix
 dtrain <- xgb.DMatrix(data.matrix(train[,col.xgb]), label=train$target)
 dtest <- xgb.DMatrix(data.matrix(test[,col.xgb]), label=test$target)
@@ -500,6 +499,7 @@ ROCRPred <- prediction(test$pred.xgb.s, test$target)
 ROCRperf <- performance(ROCRPred,"tpr","fpr")
 plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0.1,1,by=0.1), text.adj=c(-0.2,1.7))
 ```
+
 Best AUC on the test set: 0.8029
 
 ### 3.3.7 Tuned XGBoost Model Performance - Confusion Matrix
