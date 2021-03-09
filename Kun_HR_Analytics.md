@@ -121,7 +121,7 @@ two_plots(gender)
 
 In this sample there’s more male than female. It seems like the gender
 balance in Data Science field is still a problem. The pink bin stands
-for missing gender.\ 
+for missing gender.<br/>
 
 
 ``` r
@@ -133,7 +133,7 @@ two_plots(relevent_experience)
 Most people in this sample has relevant experience in Data Science.
 However, those who doesn’t tend to seeking for job change more often.
 Maybe those are the people who wants to take the opportunity of this
-training and make a career switch.\ 
+training and make a career switch.<br/> 
 
 
 ``` r
@@ -145,7 +145,7 @@ two_plots(enrolled_university)
 Most people are not enrolled in a university right now. People who
 enrolled in full time course are likely to look for job change. It makes
 sense as most people enroll in universities to either get their first
-job or seek for career switch.\ 
+job or seek for career switch.<br/> 
 
 
 ``` r
@@ -158,7 +158,7 @@ Most people have a master degree. That explains the high
 ‘no\_enrollment’ in the previous chart. This group of people might
 be industry professionals who hold a master degree seeking for career
 advancement or career switch. They have the highest intention for job
-change.\ 
+change.<br/> 
 
 
 ``` r
@@ -169,7 +169,7 @@ two_plots(major_discipline)
 
 It’s not surprising that most candidates are from a STEM major as we are
 analyzing a Data Science training program. Job switching intential is
-even across majors.\ 
+even across majors.<br/> 
 
 
 ``` r
@@ -181,7 +181,7 @@ two_plots(experience)
 More than 3000 people have over 20 years of experience; Only a tiny
 amount of people have less than 1 year of experience. This is consistent
 with our previous finding that the majority of people are industry
-professional looking for career switch or career advancement\ 
+professional looking for career switch or career advancement<br/> 
 
 
 ``` r
@@ -194,7 +194,7 @@ pattern. For example, people might leave it blank if they don’t
 currently have a job. Further investigation into how the data is
 collected and the missing pattern need to be done before drawing
 conclusion. Other than this unknown category, job switch percentage
-seems to be relatively even across all company sizes.\ 
+seems to be relatively even across all company sizes.<br/> 
 
 
 ``` r
@@ -205,7 +205,7 @@ two_plots(company_type)
 
 Near 100,000 people are from private limited company. The 2nd most
 category is early stage companies, which have the highest percentage of
-job switch intention.\ 
+job switch intention.<br/> 
 
 
 ``` r
@@ -285,9 +285,9 @@ ggplot(hr, aes(x = training_hours, group=as.factor(target), color=as.factor(targ
 Training hours seem to not affect job switch a lot.
 
 <br>
-\ 
+<br/> 
 
-# 2\. Data Cleaning
+# 2<br/>. Data Cleaning
 
 ## 2.1 Missing Value
 
@@ -424,7 +424,7 @@ hr.cleaned <- data.frame(predict(dmy, newdata = hr.cleaned))
 ```
 
 <br>
-\ 
+<br/> 
 
 # 3.Modeling
 
