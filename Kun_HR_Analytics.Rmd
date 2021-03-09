@@ -2,11 +2,13 @@
 title: "HR Analytics"
 author: "Kun Qian"
 date: "3/1/2021"
-output: rmarkdown::github_document
+output: 
+  github_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.width=8, fig.height=3.5)
 ```
 
 The goal of this task is building model(s) that uses the current credentials,demographics,experience to predict the probability of a candidate looking for a new job or will work for the company.
@@ -413,7 +415,7 @@ Here we tune the following other parameters:
 
 - colsample_bytree: It control the number of features (variables) supplied to a tree
 
-```{r}
+```{r eval=TRUE, cache=TRUE, message=FALSE}
 # set up the cross-validated hyper-parameter search
 xgb_grid = expand.grid(
   nrounds=xgbcv$best_iteration,

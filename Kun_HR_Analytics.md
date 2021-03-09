@@ -3,11 +3,43 @@ HR Analytics
 Kun Qian
 3/1/2021
 
+  - [1. Exploratory Data Analysis](#exploratory-data-analysis)
+      - [1.1 Explore Categorical
+        Variables](#explore-categorical-variables)
+      - [1.2 Explore Continuous
+        Variables](#explore-continuous-variables)
+  - [2. Data Cleaning](#data-cleaning)
+      - [2.1 Missing Value](#missing-value)
+      - [2.2 Categorical Variables Encoding:
+        Ordinal](#categorical-variables-encoding-ordinal)
+      - [2.3 Categorical Variables Encoding:
+        Nominal](#categorical-variables-encoding-nominal)
+  - [3.Modeling](#modeling)
+      - [3.1Preparation For Modeling](#preparation-for-modeling)
+      - [3.2 Logistic Regression](#logistic-regression)
+      - [3.2 CART](#cart)
+      - [3.2.1 Untuned CART](#untuned-cart)
+      - [3.2.2 CART Tuning](#cart-tuning)
+          - [3.2.3 Tuned CART Performance](#tuned-cart-performance)
+      - [3.3 XGBoost](#xgboost)
+          - [3.3.1 Untuned XGBoost](#untuned-xgboost)
+          - [3.3.2 Untuned XGBoost
+            Performance](#untuned-xgboost-performance)
+          - [3.3.3 XGBoost Tuning](#xgboost-tuning)
+          - [3.3.4 Tuned XGBoost Model
+            Fitting](#tuned-xgboost-model-fitting)
+          - [3.3.5 Tuned XGBoost Model Performance - Feature
+            Importance](#tuned-xgboost-model-performance---feature-importance)
+          - [3.3.6 Tuned XGBoost Model Performance -
+            AUC](#tuned-xgboost-model-performance---auc)
+          - [3.3.7 Tuned XGBoost Model Performance - Confusion
+            Matrix](#tuned-xgboost-model-performance---confusion-matrix)
+
 The goal of this task is building model(s) that uses the current
 credentials,demographics,experience to predict the probability of a
 candidate looking for a new job or will work for the company.
 
-Read Data
+# 0\. Load Data
 
 ``` r
 set.seed(42)
@@ -84,7 +116,7 @@ to identify interesting patterns of job switching decisions.**
 two_plots(gender)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->
 
 In this sample there’s more male than female. It seems like the gender
 balance in Data Science field is still a problem. The pink bin stands
@@ -94,7 +126,7 @@ for missing gender.
 two_plots(relevent_experience)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-4-1.png)<!-- -->
 
 Most people in this sample has relevant experience in Data Science.
 However, those who doesn’t tend to seeking for job change more often.
@@ -105,7 +137,7 @@ training and make a career switch.
 two_plots(enrolled_university)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-5-1.png)<!-- -->
 
 Most people are not enrolled in a university right now. People who
 enrolled in full time course are likely to look for job change. It makes
@@ -116,7 +148,7 @@ job or seek for career switch
 two_plots(education_level)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->
 
 Most people have a master degree. That explains the high
 ‘no\_enrollment’ in the previous chart. This group of people might
@@ -128,7 +160,7 @@ change.
 two_plots(major_discipline)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->
 
 It’s not surprising that most candidates are from a STEM major as we are
 analyzing a Data Science training program. Job switching intential is
@@ -138,7 +170,7 @@ even across majors.
 two_plots(experience)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->
 
 More than 3000 people have over 20 years of experience; Only a tiny
 amount of people have less than 1 year of experience. This is consistent
@@ -149,19 +181,19 @@ professional looking for career switch or career advancement.
 two_plots(company_size)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-9-1.png)<!-- --> Lots
-of missing data for company\_size. This could be missing with a pattern.
-For example, people might leave it blank if they don’t currently have a
-job. Further investigation into how the data is collected and the
-missing pattern need to be done before drawing conclusion. Other than
-this unknown category, job switch percentage seems to be relatively even
-across all company sizes.
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+Lots of missing data for company\_size. This could be missing with a
+pattern. For example, people might leave it blank if they don’t
+currently have a job. Further investigation into how the data is
+collected and the missing pattern need to be done before drawing
+conclusion. Other than this unknown category, job switch percentage
+seems to be relatively even across all company sizes.
 
 ``` r
 two_plots(company_type)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->
 
 Near 100,000 people are from private limited company. The 2nd most
 category is early stage companies, which have the highest percentage of
@@ -171,7 +203,7 @@ job switch intention.
 two_plots(last_new_job)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-11-1.png)<!-- -->
 
 Most people only have 1 year between their previous job and current job.
 
@@ -189,7 +221,7 @@ cor <- cor(num)
 corplot <- corrplot(cor, type = 'lower', method = 'number')
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-12-1.png)<!-- -->
 
 City development index has a moderate negative correlation with the
 target varibale. That means the more developed the city is, the less
@@ -213,7 +245,7 @@ ggplot(cities, aes(x=avg_development_index, y=switch_rate, color=city)) +
   ggtitle("Average city development index and job switch rate")
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->
 
 There’s an interesting pattern between city development level and switch
 rate. It seems like the job switch rate is high for cities that have a
@@ -227,7 +259,7 @@ the job switch rate shows a downward trend for developed cities.
 ggplot(hr, aes(x = city_development_index, group=as.factor(target), color=as.factor(target))) + geom_density(stat = 'density')+ ggtitle("Distribution of city development index by target group") + scale_colour_discrete("Switching Job?")
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->
 
 More people at a low city development index are looking for job change,
 and less at high development index are looking for job change.
@@ -239,7 +271,7 @@ and less at high development index are looking for job change.
 ggplot(hr, aes(x = training_hours, group=as.factor(target), color=as.factor(target))) + geom_density(stat = 'density')+ ggtitle("Distribution of training hours by target group") + scale_colour_discrete("Switching Job?")
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 Training hours seem to not affect job switch a lot.
 
@@ -470,7 +502,7 @@ t <- caret::train(as.factor(target)~., na.omit(train), method='rpart', trControl
 plot(t$results$cp, t$results$Accuracy, type='b', ylab="Accuracy", xlab="cp")
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
 
 The best complexity parameter is 0.006
 
@@ -490,7 +522,7 @@ get_auc(model.cart)
 rpart.plot(model.cart)
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 The tuned CART model got an AUC of 0.76. According to the plot,
 ‘city\_development\_index’ is the most significant predictor.
@@ -635,6 +667,7 @@ xgb_trcontrol = trainControl(
 train_target = ifelse(train[,1]==1, 'yes','no')
 xgb_train_1 = caret::train(x=data.matrix(train[,col.xgb]), y=train_target, trControl = xgb_trcontrol, tuneGrid = xgb_grid, method = "xgbTree")
 ```
+
     ## Selecting tuning parameters
     ## Fitting nrounds = 8, max_depth = 6, eta = 0.3, gamma = 0, colsample_bytree = 0.75, min_child_weight = 1, subsample = 1 on full training set
 
@@ -664,7 +697,7 @@ mat <- xgb.importance (feature_names = colnames(test[,-1]),model = model.xgboost
 xgb.plot.importance (importance_matrix = mat[1:20]) 
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
 According to our best model, city\_development\_index is the best
 predictor to whether a candidate is looking for job change or not. From
 our previous exploratory analysis, it seems like candidates in a less
@@ -713,8 +746,8 @@ ROCRperf <- performance(ROCRPred,"tpr","fpr")
 plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0.1,1,by=0.1), text.adj=c(-0.2,1.7))
 ```
 
-![](Kun-516-Final_files/figure-gfm/unnamed-chunk-31-1.png)<!-- --> Best
-AUC on the test set: 0.8029
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+Best AUC on the test set: 0.8029
 
 ### 3.3.7 Tuned XGBoost Model Performance - Confusion Matrix
 
