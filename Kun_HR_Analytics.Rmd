@@ -3,14 +3,15 @@ title: "HR Analytics"
 author: "Kun Qian"
 date: "3/1/2021"
 output: 
-  word_document
+  github_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE, fig.width=8, fig.height=3.5)
 ```
 
-The goal of this task is building model(s) that uses the current credentials,demographics,experience to predict the probability of a candidate looking for a new job or will work for the company.
+The goal of this task is building model(s) that uses the current credentials, demographics, experience to predict the probability of a candidate looking for a new job or will work for the company.
 
 Read Data
 ```{r}
@@ -105,6 +106,7 @@ More than 3000 people have over 20 years of experience; Only a tiny amount of pe
 ```{r}
 two_plots(company_size)
 ```
+
 Lots of missing data for company_size. This could be missing with a pattern. For example, people might leave it blank if they don't currently have a job. Further investigation into how the data is collected and the missing pattern need to be done before drawing conclusion. Other than this unknown category, job switch percentage seems to be relatively even across all company sizes.
 
 ```{r}
@@ -181,8 +183,30 @@ Training hours seem to not affect job switch a lot.
 # Check the percentage of missing value in each column, excluding the dummy
 sort(colMeans(is.na(hr)), decreasing = TRUE)
 ```
-Not much missing values overall. Let the model handle it first and see how it goes.
 
+At the first look there's no missing value. But from EDA we saw a couple categories with empty names. Let's check if there's any other type of missing values.
+
+```{r}
+# number of columns
+num_col <- dim(hr)[2]
+# empty vector for later use
+num_empty <- integer(num_col)
+
+# loop around all columns to check if there's any empty string
+for(i in 1:num_col) {
+  cnt <- sum(hr[,i]=='')
+  num_empty[i] <- cnt
+}
+
+# get the percentage of empty cells in each col
+pct_empty <- num_empty/nrow(hr)
+# link the empty value to each column names
+pct_empty <- setNames(pct_empty, colnames(hr))
+# see result
+sort(pct_empty, decreasing=TRUE)
+```
+
+'company_type', 'company_size', 'gender' have have the highest percentage of missing value. But since none of them has extremely high percentage (>60%), we decide to retain all columns. And also since we plan to mainly use tree based models, imputation might not be absolute necessary at this point.
 
 ## 2.2 Categorical Variables Encoding: Ordinal
 Convert the data type of ordinal categorical variables into integer
@@ -325,7 +349,7 @@ get_auc(model.lr)
 
 ## 3.2 CART
 ## 3.2.1 Untuned CART 
-```{r}
+```{r cache=TRUE}
 # CART
 library(rpart)
 library(rpart.plot)
@@ -352,7 +376,7 @@ plot(t$results$cp, t$results$Accuracy, type='b', ylab="Accuracy", xlab="cp")
 The best complexity parameter is 0.006
 
 ### 3.2.3 Tuned CART Performance
-```{r}
+```{r cache=TRUE}
 # fit with the tuned tree
 model.cart <- rpart(target~., train, control = rpart.control(cp = t$bestTune$cp))
 get_auc(model.cart)
@@ -365,7 +389,7 @@ The tuned CART model got an AUC of 0.76. According to the plot, 'city_developmen
 
 ## 3.3 XGBoost
 ### 3.3.1 Untuned XGBoost
-```{r}
+```{r cache=TRUE}
 library(xgboost)
 col.xgb <- c(2:151)
 model.xgboost <- xgboost(data = data.matrix(train[,col.xgb]),
@@ -378,7 +402,7 @@ model.xgboost <- xgboost(data = data.matrix(train[,col.xgb]),
 ```
 
 ### 3.3.2 Untuned XGBoost Performance
-```{r}
+```{r cache=TRUE}
 # xgboost on train
 pred.xgb.train <- predict(model.xgboost, as.matrix(train[,col.xgb]))
 auc.xgb.train <- roc(train$target, pred.xgb.train)
@@ -455,7 +479,7 @@ xgb_train_1 = caret::train(x=data.matrix(train[,col.xgb]), y=train_target, trCon
 
 
 ### 3.3.4 Tuned XGBoost Model Fitting
-```{r}
+```{r cache=TRUE}
 model.xgboost.super <- xgboost(data = data.matrix(train[,col.xgb]),
                   label = train[,1],
                   nrounds = 8, 
@@ -518,5 +542,69 @@ Interpretation:
 
 This result is good for the purpose of our client. Since training and planning for a candidate is a costly matter, we don't want to waste a lot of resources on those who are not looking for a job change. On the other hand, it's okay if we miss some candidates who are indeed looking for job changes, as the loss is not as big as wasting resources on unpromising candidates.
 
+<br>
 
 
+# 4. Business Implication
+Now let's explore the potential business implication of our best model.
+
+## 4.1 Monetary Matrix
+We want to assign a monetary value to each of the possible cases: 
+
+* True Positive 
+  + A true positive means the model successfully identify a person who's looking for job change. This could substantially increase the possibility of a good hire, which could bring great value to the company. Thus we assign this category a monetary value of $200
+
+* False Positive 
+  + A false positive means the model falsely identify someone who's not looking for a job as a prospect. This could waste a lot of time, effort and resources if the company treat them like promising candidate. Thus we assign this category a monetary value of -$150.
+  
+* True Negative 
+  + A true negative means the model correctly identify someone who's not looking for job as s/he's not looking for job. This does not bring extra value nor cost the company anything. Thus we assign this category a monetary value of $0.
+
+* False Negative
+  + A False negative means the model falsely identify someone who's actually looking for a job as someone who's not. Company loses potential talent by the false categorization. But since this would be relatively smaller loss comparing to the false positive, we assign this category with a monetary value of -$50.
+  
+
+Hence we have a monetary matrix that looks like this:
+
++-----------------+---------------+-------------+
+|                 | Actual False  | Actual True |
++=================+===============+=============+
+| Predicted False |     $0        |   -\$50     |
++-----------------+---------------+-------------+
+| Predicted True |    -\$150      |   \$200     |
++-----------------+---------------+-------------+
+
+Now let's construct it in R
+```{r}
+library(rlist)
+# construct the monetary matrix
+M <- matrix(c(0,-50,-150,200), nrow = 2, byrow = TRUE)
+
+# multiply the confusion matrix with the monetary matrix
+exp_profit <- M * cm$table
+sum(exp_profit)
+
+max_profit <- c()
+# loop through all possible threshold and find the maximum profit and best threshold
+for(i in seq(0.01,1,0.01)) {
+  xgb.pred <- ifelse(pred.xgb.s>i,1,0)
+  cm <- confusionMatrix(as.factor(xgb.pred), as.factor(test$target), positive='1')
+  exp_profit <- M * cm$table
+  max_profit <- list.append(max_profit,sum(exp_profit))
+}
+
+max_profit <- setNames(max_profit,seq(0.01,1,0.01))
+# plot the threshold and profit
+plot(seq(0.01,1,0.01), max_profit)
+# return the best threshold and profit
+max_profit[max_profit==max(max_profit)]
+```
+
+The revenue generated by implementing model will be \$46,500. But how does that compare to if there's no such model? Let's construct a baseline model which we assume the company targets everyone as a prospect and spend \$150 on each of them. The company gets \$200 if the prospect turns out to be looking for job.
+
+```{r}
+# naive approach
+(sum(hr$target)*200)-(nrow(hr)*150)
+```
+
+The naive approach without the model is completely out of scope. It's unfeasible as the loss is huge. Therefore, the company should use the help of the model to more precisely identify job-changing candidates.

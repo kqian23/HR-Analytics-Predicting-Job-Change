@@ -34,12 +34,14 @@ Kun Qian
             AUC](#tuned-xgboost-model-performance---auc)
           - [3.3.7 Tuned XGBoost Model Performance - Confusion
             Matrix](#tuned-xgboost-model-performance---confusion-matrix)
+  - [4. Business Implication](#business-implication)
+      - [4.1 Monetary Matrix](#monetary-matrix)
 
 The goal of this task is building model(s) that uses the current
-credentials,demographics,experience to predict the probability of a
+credentials, demographics, experience to predict the probability of a
 candidate looking for a new job or will work for the company.
 
-# 0\. Load Data
+Read Data
 
 ``` r
 set.seed(42)
@@ -73,7 +75,7 @@ str(hr)
 ## 1.1 Explore Categorical Variables
 
 **Write a function to generate two visualizations that allow us to
-observe the relationship**
+observe the relationship**  
 
 ``` r
 # visualization
@@ -110,8 +112,7 @@ two_plots <- function(category) {
 ```
 
 **Now let’s visualize each categorical variable and the target variable,
-to identify interesting patterns of job switching decisions.**
-
+to identify interesting patterns of job switching decisions.**  
 
 ``` r
 two_plots(gender)
@@ -121,8 +122,7 @@ two_plots(gender)
 
 In this sample there’s more male than female. It seems like the gender
 balance in Data Science field is still a problem. The pink bin stands
-for missing gender.<br/>
-
+for missing gender.
 
 ``` r
 two_plots(relevent_experience)
@@ -133,8 +133,7 @@ two_plots(relevent_experience)
 Most people in this sample has relevant experience in Data Science.
 However, those who doesn’t tend to seeking for job change more often.
 Maybe those are the people who wants to take the opportunity of this
-training and make a career switch.<br/> 
-
+training and make a career switch.
 
 ``` r
 two_plots(enrolled_university)
@@ -145,8 +144,7 @@ two_plots(enrolled_university)
 Most people are not enrolled in a university right now. People who
 enrolled in full time course are likely to look for job change. It makes
 sense as most people enroll in universities to either get their first
-job or seek for career switch.<br/> 
-
+job or seek for career switch
 
 ``` r
 two_plots(education_level)
@@ -158,8 +156,7 @@ Most people have a master degree. That explains the high
 ‘no\_enrollment’ in the previous chart. This group of people might
 be industry professionals who hold a master degree seeking for career
 advancement or career switch. They have the highest intention for job
-change.<br/> 
-
+change.
 
 ``` r
 two_plots(major_discipline)
@@ -169,8 +166,7 @@ two_plots(major_discipline)
 
 It’s not surprising that most candidates are from a STEM major as we are
 analyzing a Data Science training program. Job switching intential is
-even across majors.<br/> 
-
+even across majors.
 
 ``` r
 two_plots(experience)
@@ -181,21 +177,20 @@ two_plots(experience)
 More than 3000 people have over 20 years of experience; Only a tiny
 amount of people have less than 1 year of experience. This is consistent
 with our previous finding that the majority of people are industry
-professional looking for career switch or career advancement<br/> 
-
+professional looking for career switch or career advancement.
 
 ``` r
 two_plots(company_size)
 ```
 
 ![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->
+
 Lots of missing data for company\_size. This could be missing with a
 pattern. For example, people might leave it blank if they don’t
 currently have a job. Further investigation into how the data is
 collected and the missing pattern need to be done before drawing
 conclusion. Other than this unknown category, job switch percentage
-seems to be relatively even across all company sizes.<br/> 
-
+seems to be relatively even across all company sizes.
 
 ``` r
 two_plots(company_type)
@@ -205,8 +200,7 @@ two_plots(company_type)
 
 Near 100,000 people are from private limited company. The 2nd most
 category is early stage companies, which have the highest percentage of
-job switch intention.<br/> 
-
+job switch intention.
 
 ``` r
 two_plots(last_new_job)
@@ -220,7 +214,7 @@ Most people only have 1 year between their previous job and current job.
 
 ## 1.2 Explore Continuous Variables
 
-**correlation plot**
+**correlation plot**  
 
 ``` r
 library(corrplot)
@@ -238,7 +232,7 @@ people in that city are likely to look for job change. Also it seems
 like training hour is not linearly correlated with job change.
 
 **Look into the relationship between city development index and job
-switch rate**
+switch rate**  
 
 ``` r
 # Look into the relationship between city development index and job switch rate
@@ -262,6 +256,7 @@ development index less than 0.6. However, once a city reaches above 0.6,
 the job switch rate shows a downward trend for developed cities.
 
 **The distribution of city development index by different target group**
+ 
 
 ``` r
 # The distribution of city development index by different target group
@@ -273,7 +268,7 @@ ggplot(hr, aes(x = city_development_index, group=as.factor(target), color=as.fac
 More people at a low city development index are looking for job change,
 and less at high development index are looking for job change.
 
-**Distribution of training hours by target group**
+**Distribution of training hours by target group**  
 
 ``` r
 # Distribution of training hours by target group
@@ -285,9 +280,8 @@ ggplot(hr, aes(x = training_hours, group=as.factor(target), color=as.factor(targ
 Training hours seem to not affect job switch a lot.
 
 <br>
-<br/> 
 
-# 2<br/>. Data Cleaning
+# 2\. Data Cleaning
 
 ## 2.1 Missing Value
 
@@ -307,8 +301,46 @@ sort(colMeans(is.na(hr)), decreasing = TRUE)
     ##         training_hours                 target 
     ##                      0                      0
 
-Not much missing values overall. Let the model handle it first and see
-how it goes.
+At the first look there’s no missing value. But from EDA we saw a couple
+categories with empty names. Let’s check if there’s any other type of
+missing values.
+
+``` r
+# number of columns
+num_col <- dim(hr)[2]
+# empty vector for later use
+num_empty <- integer(num_col)
+
+# loop around all columns to check if there's any empty string
+for(i in 1:num_col) {
+  cnt <- sum(hr[,i]=='')
+  num_empty[i] <- cnt
+}
+
+# get the percentage of empty cells in each col
+pct_empty <- num_empty/nrow(hr)
+# link the empty value to each column names
+pct_empty <- setNames(pct_empty, colnames(hr))
+# see result
+sort(pct_empty, decreasing=TRUE)
+```
+
+    ##           company_type           company_size                 gender 
+    ##            0.320492745            0.309948846            0.235306399 
+    ##       major_discipline        education_level           last_new_job 
+    ##            0.146831611            0.024010857            0.022079549 
+    ##    enrolled_university             experience            enrollee_id 
+    ##            0.020148241            0.003392839            0.000000000 
+    ##                   city city_development_index    relevent_experience 
+    ##            0.000000000            0.000000000            0.000000000 
+    ##         training_hours                 target 
+    ##            0.000000000            0.000000000
+
+‘company\_type’, ‘company\_size’, ‘gender’ have have the highest
+percentage of missing value. But since none of them has extremely high
+percentage (\>60%), we decide to retain all columns. And also since we
+plan to mainly use tree based models, imputation might not be absolute
+necessary at this point.
 
 ## 2.2 Categorical Variables Encoding: Ordinal
 
@@ -424,7 +456,6 @@ hr.cleaned <- data.frame(predict(dmy, newdata = hr.cleaned))
 ```
 
 <br>
-<br/> 
 
 # 3.Modeling
 
@@ -449,7 +480,7 @@ sum(test$target)/nrow(test)
 
     ## [1] 0.2492822
 
-**Create a function to calculate auc**
+**Create a function to calculate auc**  
 
 ``` r
 library(pROC)
@@ -513,7 +544,7 @@ t <- caret::train(as.factor(target)~., na.omit(train), method='rpart', trControl
 plot(t$results$cp, t$results$Accuracy, type='b', ylab="Accuracy", xlab="cp")
 ```
 
-![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
 
 The best complexity parameter is 0.006
 
@@ -533,7 +564,7 @@ get_auc(model.cart)
 rpart.plot(model.cart)
 ```
 
-![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
 
 The tuned CART model got an AUC of 0.76. According to the plot,
 ‘city\_development\_index’ is the most significant predictor.
@@ -588,8 +619,10 @@ auc.xgb
 
 ### 3.3.3 XGBoost Tuning
 
-**XGBoost Tuning: nround** 
-What is nround?: It controls the maximum number of iterations. For classification, it is similar to the number of trees to grow.
+**XGBoost Tuning: nround**  
+
+What is nround?: It controls the maximum number of iterations. For
+classification, it is similar to the number of trees to grow.
 
 ``` r
 # convert dtaframe to DMatrix
@@ -629,7 +662,8 @@ max(xgbcv$evaluation_log$test_auc_mean)
 # The highest auc on CV set is 0.8014
 ```
 
-**XGBoost Tuning: grid search** 
+**XGBoost Tuning: grid search**  
+
 Here we tune the following other parameters:
 
   - eta: It controls the learning rate, i.e., the rate at which our
@@ -707,7 +741,7 @@ mat <- xgb.importance (feature_names = colnames(test[,-1]),model = model.xgboost
 xgb.plot.importance (importance_matrix = mat[1:20]) 
 ```
 
-![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
 
 According to our best model, city\_development\_index is the best
 predictor to whether a candidate is looking for job change or not. From
@@ -757,7 +791,8 @@ ROCRperf <- performance(ROCRPred,"tpr","fpr")
 plot(ROCRperf, colorize=TRUE, print.cutoffs.at=seq(0.1,1,by=0.1), text.adj=c(-0.2,1.7))
 ```
 
-![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
 Best AUC on the test set: 0.8029
 
 ### 3.3.7 Tuned XGBoost Model Performance - Confusion Matrix
@@ -811,3 +846,121 @@ lot of resources on those who are not looking for a job change. On the
 other hand, it’s okay if we miss some candidates who are indeed looking
 for job changes, as the loss is not as big as wasting resources on
 unpromising candidates.
+
+<br>
+
+# 4\. Business Implication
+
+Now let’s explore the potential business implication of our best model.
+
+## 4.1 Monetary Matrix
+
+We want to assign a monetary value to each of the possible cases:
+
+  - True Positive
+      - A true positive means the model successfully identify a person
+        who’s looking for job change. This could substantially increase
+        the possibility of a good hire, which could bring great value to
+        the company. Thus we assign this category a monetary value of
+        $200
+  - False Positive
+      - A false positive means the model falsely identify someone who’s
+        not looking for a job as a prospect. This could waste a lot of
+        time, effort and resources if the company treat them like
+        promising candidate. Thus we assign this category a monetary
+        value of -$150.
+  - True Negative
+      - A true negative means the model correctly identify someone who’s
+        not looking for job as s/he’s not looking for job. This does not
+        bring extra value nor cost the company anything. Thus we assign
+        this category a monetary value of $0.
+  - False Negative
+      - A False negative means the model falsely identify someone who’s
+        actually looking for a job as someone who’s not. Company loses
+        potential talent by the false categorization. But since this
+        would be relatively smaller loss comparing to the false
+        positive, we assign this category with a monetary value of -$50.
+
+Hence we have a monetary matrix that looks like this:
+
+<table style="width:69%;">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 22%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Actual False</th>
+<th>Actual True</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Predicted False</td>
+<td><pre><code>$0</code></pre></td>
+<td>-$50</td>
+</tr>
+<tr class="even">
+<td>Predicted True |</td>
+<td>-$150</td>
+<td>$200</td>
+</tr>
+</tbody>
+</table>
+
+Now let’s construct it in R
+
+``` r
+library(rlist)
+# construct the monetary matrix
+M <- matrix(c(0,-50,-150,200), nrow = 2, byrow = TRUE)
+
+# multiply the confusion matrix with the monetary matrix
+exp_profit <- M * cm$table
+sum(exp_profit)
+```
+
+    ## [1] 27800
+
+``` r
+max_profit <- c()
+# loop through all possible threshold and find the maximum profit and best threshold
+for(i in seq(0.01,1,0.01)) {
+  xgb.pred <- ifelse(pred.xgb.s>i,1,0)
+  cm <- confusionMatrix(as.factor(xgb.pred), as.factor(test$target), positive='1')
+  exp_profit <- M * cm$table
+  max_profit <- list.append(max_profit,sum(exp_profit))
+}
+
+max_profit <- setNames(max_profit,seq(0.01,1,0.01))
+# plot the threshold and profit
+plot(seq(0.01,1,0.01), max_profit)
+```
+
+![](Kun_HR_Analytics_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+``` r
+# return the best threshold and profit
+max_profit[max_profit==max(max_profit)]
+```
+
+    ##  0.38 
+    ## 46500
+
+The revenue generated by implementing model will be $46,500. But how
+does that compare to if there’s no such model? Let’s construct a
+baseline model which we assume the company targets everyone as a
+prospect and spend $150 on each of them. The company gets $200 if the
+prospect turns out to be looking for job.
+
+``` r
+# naive approach
+(sum(hr$target)*200)-(nrow(hr)*150)
+```
+
+    ## [1] -1918300
+
+The naive approach without the model is completely out of scope. It’s
+unfeasible as the loss is huge. Therefore, the company should use the help of the model to more precisely identify job-changing candidates.
