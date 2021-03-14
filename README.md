@@ -404,14 +404,7 @@ hr.cleaned$experience[hr.cleaned$experience=='>20'] <- '21'
 hr.cleaned$experience <- as.integer(hr.cleaned$experience)
 
 # convert last_new_job
-table(hr.cleaned$last_new_job)
-```
-
-    ## 
-    ##          >4     1     2     3     4 never 
-    ##   423  3290  8040  2900  1024  1029  2452
-
-``` r
+# table(hr.cleaned$last_new_job)
 hr.cleaned$last_new_job[hr.cleaned$last_new_job=='1'] <- 0
 hr.cleaned$last_new_job[hr.cleaned$last_new_job=='2'] <- 1
 hr.cleaned$last_new_job[hr.cleaned$last_new_job=='3'] <- 2
@@ -427,14 +420,7 @@ hr.cleaned$relevent_experience[hr.cleaned$relevent_experience=='Has relevent exp
 hr.cleaned$relevent_experience <- as.integer(hr.cleaned$relevent_experience)
 
 # convert enrolled_university
-table(hr.cleaned$enrolled_university)
-```
-
-    ## 
-    ##                  Full time course    no_enrollment Part time course 
-    ##              386             3757            13817             1198
-
-``` r
+# table(hr.cleaned$enrolled_university)
 hr.cleaned$enrolled_university[hr.cleaned$enrolled_university=='no_enrollment'] <- 0
 hr.cleaned$enrolled_university[hr.cleaned$enrolled_university=='Part time course'] <- 1
 hr.cleaned$enrolled_university[hr.cleaned$enrolled_university=='Full time course'] <- 2

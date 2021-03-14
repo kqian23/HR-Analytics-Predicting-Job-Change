@@ -290,7 +290,7 @@ hr.cleaned$experience[hr.cleaned$experience=='>20'] <- '21'
 hr.cleaned$experience <- as.integer(hr.cleaned$experience)
 
 # convert last_new_job
-table(hr.cleaned$last_new_job)
+# table(hr.cleaned$last_new_job)
 hr.cleaned$last_new_job[hr.cleaned$last_new_job=='1'] <- 0
 hr.cleaned$last_new_job[hr.cleaned$last_new_job=='2'] <- 1
 hr.cleaned$last_new_job[hr.cleaned$last_new_job=='3'] <- 2
@@ -306,7 +306,7 @@ hr.cleaned$relevent_experience[hr.cleaned$relevent_experience=='Has relevent exp
 hr.cleaned$relevent_experience <- as.integer(hr.cleaned$relevent_experience)
 
 # convert enrolled_university
-table(hr.cleaned$enrolled_university)
+# table(hr.cleaned$enrolled_university)
 hr.cleaned$enrolled_university[hr.cleaned$enrolled_university=='no_enrollment'] <- 0
 hr.cleaned$enrolled_university[hr.cleaned$enrolled_university=='Part time course'] <- 1
 hr.cleaned$enrolled_university[hr.cleaned$enrolled_university=='Full time course'] <- 2
@@ -586,7 +586,7 @@ Interpretation:
 This result is good for the purpose of our client. Since training and planning for a candidate is a costly matter, we don't want to waste a lot of resources on those who are not looking for a job change. On the other hand, it's okay if we miss some candidates who are indeed looking for job changes, as the loss is not as big as wasting resources on unpromising candidates.
 
 ### 3.3.7 Tuned XGBoost Model Performance - Feature Importance
-```{r fig.width=4, fig.height=3}
+```{r fig.width=4, fig.height=2.5}
 #view variable importance plot
 mat <- xgb.importance (feature_names = colnames(test[,-1]),model = model.xgboost.super)
 xgb.plot.importance (importance_matrix = mat[1:20]) 
